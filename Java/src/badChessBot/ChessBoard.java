@@ -20,7 +20,7 @@ public class ChessBoard {
 	public ChessBoard() {
 		// Creating Chess Starting Position
 		
-		playerToMove = Color.white;
+		playerToMove = Color.black;
 		
 		for (int x = 0; x < boardX; x++) {
 			for (int y = 0; y < boardY; y++) {
@@ -53,6 +53,10 @@ public class ChessBoard {
 		board[5][7] = new Piece(PieceType.bishop, Color.black);
 		board[6][7] = new Piece(PieceType.knight, Color.black);
 		board[7][7] = new Piece(PieceType.rook, Color.black);
+		
+		//Tests
+		//board[4][2] = new Piece(PieceType.bishop, Color.black);
+		//board[4][5] = new Piece(PieceType.bishop, Color.white);
 		
 	}
 	
@@ -92,11 +96,37 @@ public class ChessBoard {
 		return newChessBoard;
 	}
 	
+	private boolean isWithinBoard(int x, int y) {
+		if ((x >= 0) && (x < boardX) && (y >= 0) && (y < boardY)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean isEmptyPosition(int x, int y) {
+		if (board[x][y].getPieceType() == PieceType.empty) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean isEnemyPosition(int x, int y) {
+		if ((board[x][y].getPieceType() != PieceType.empty) &&
+				(board[x][y].getPieceColor() != playerToMove)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public void generateChildren() {
 		children.clear();
 		
 		Piece piece;
 		ChessBoard child;
+		int pawnDirection;
 		
 		for (int x = 0; x < boardX; x++) {
 			for (int y = 0; y < boardY; y++) {
@@ -107,28 +137,47 @@ public class ChessBoard {
 					if (piece.getPieceType() == PieceType.pawn) {
 						
 						if (piece.getPieceColor() == Color.white) {
-							// normal 1x forward
-							if (board[x][y+1].getPieceType() == PieceType.empty) {
-								child = this.makeMove(x, y, x, y+1);
-								
-								children.add(child);
-								System.out.println(child);
-							}
+							pawnDirection = 1;
+						} else {
+							pawnDirection = -1;
+						}
+						
+						// normal 1x forward
+						if (isWithinBoard(x, y+pawnDirection*1) && isEmptyPosition(x, y+pawnDirection*1)) {
+							child = this.makeMove(x, y, x, y+pawnDirection*1);
 							
-							// 2x forward
-							if ((piece.isUnmoved()) &&
-									(board[x][y+1].getPieceType() == PieceType.empty) &&
-									(board[x][y+2].getPieceType() == PieceType.empty)) {
-								child = this.makeMove(x, y, x, y+2);
-								
-								children.add(child);
-								
-								System.out.println(child);
-							}
+							children.add(child);
+							System.out.println(child);
+						}
+						
+						// 2x forward
+						if (isWithinBoard(x, y+pawnDirection*2) && 
+								piece.isUnmoved() &&
+								isEmptyPosition(x, y+pawnDirection*1) &&
+								isEmptyPosition(x, y+pawnDirection*2)) {
+							child = this.makeMove(x, y, x, y+pawnDirection*2);
 							
-							// take left
+							children.add(child);
 							
-							// take right
+							System.out.println(child);
+						}
+						
+						// take front left
+						if (isWithinBoard(x-1, y+pawnDirection*1) && isEnemyPosition(x-1, y+pawnDirection*1)) {
+							
+							child = this.makeMove(x, y, x-1, y+pawnDirection*1);
+							
+							children.add(child);
+							System.out.println(child);
+						}
+						
+						// take front right
+						if (isWithinBoard(x+1, y+pawnDirection*1) && isEnemyPosition(x+1, y+pawnDirection*1)) {
+							
+							child = this.makeMove(x, y, x+1, y+pawnDirection*1);
+							
+							children.add(child);
+							System.out.println(child);
 						}
 					}
 				}
