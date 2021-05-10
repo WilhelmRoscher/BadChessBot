@@ -1,15 +1,25 @@
 package badChessBot;
 
+import badChessBot.Piece.Color;
+
 public class BadChessBot {
 	
 	public static void main (String[] Args) {
 		
-		ChessBoard b = new ChessBoard();
+		ChessBoard board = new ChessBoard();
 		
-		System.out.println(b);
-		System.out.println(b.getValue());
+		BotPlayer botWhite = new BotPlayer(Color.white);
+		BotPlayer botBlack = new BotPlayer(Color.black);
 		
-		System.out.println(b.generateChildrenRecursive(3));
+		while (true) {
+			System.out.println(board);
+			
+			board = botWhite.getNextMove(board);
+			
+			System.out.println(board);
+			
+			board = botBlack.getNextMove(board);
+		}
 	}
 
 }

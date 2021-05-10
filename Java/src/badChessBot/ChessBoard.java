@@ -15,7 +15,7 @@ public class ChessBoard {
 	
 	private Color playerToMove;
 	
-	public ArrayList<ChessBoard> children = new ArrayList<ChessBoard>();;
+	private ArrayList<ChessBoard> children = new ArrayList<ChessBoard>();
 	
 	public ChessBoard() {
 		// Creating Chess Starting Position
@@ -314,6 +314,35 @@ public class ChessBoard {
 		
 		return value;
 	}
+	
+	public int getValueMiniMax() {
+		if (children.size() == 0) {
+			return getValue();
+		}
+		
+		int value = children.get(0).getValueMiniMax();
+		int tmpValue;
+		
+		// White wants Max Value; Black wants Min Value
+		for (int i = 0; i < children.size(); i++) {
+			tmpValue = children.get(i).getValueMiniMax();
+			if (playerToMove == Color.white) {
+				if (tmpValue > value) {
+					value = tmpValue;
+				}
+			} else {
+				if (tmpValue < value) {
+					value = tmpValue;
+				}
+			}
+		}
+		
+		return value;
+	}
+	
+	public ArrayList<ChessBoard> getChildren() {
+		return children;
+	}
 
 	public String toString() {
 		String out = ""; 
@@ -322,7 +351,8 @@ public class ChessBoard {
 		for (int y = boardY - 1; y >= 0; y--) {
 			for (int x = 0; x < boardX; x++) {
 				if (colorIndicator == Color.white) {
-					out += "▯";
+					//out += "▯";
+					out += " ";
 					colorIndicator = Color.black;
 				} else {
 					out += "▮";
