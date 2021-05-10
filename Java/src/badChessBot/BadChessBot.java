@@ -7,7 +7,9 @@ public class BadChessBot {
 		ChessBoard b = new ChessBoard();
 		
 		System.out.println(b);
-		System.out.println("Ende");
+		System.out.println(b.getValue());
+		
+		b.generateChildren();
 	}
 
 }
