@@ -9,7 +9,7 @@ public class BadChessBot {
 		System.out.println(b);
 		System.out.println(b.getValue());
 		
-		b.generateChildren();
+		System.out.println(b.generateChildrenRecursive(3));
 	}
 
 }
