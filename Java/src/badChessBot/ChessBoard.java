@@ -15,7 +15,7 @@ public class ChessBoard {
 	
 	private Color playerToMove;
 	
-	public ArrayList<ChessBoard> children = new ArrayList<ChessBoard>();;
+	private ArrayList<ChessBoard> children = new ArrayList<ChessBoard>();
 	
 	public ChessBoard() {
 		// Creating Chess Starting Position
@@ -53,6 +53,10 @@ public class ChessBoard {
 		board[5][7] = new Piece(PieceType.bishop, Color.black);
 		board[6][7] = new Piece(PieceType.knight, Color.black);
 		board[7][7] = new Piece(PieceType.rook, Color.black);
+		
+		//Tests
+		//board[4][2] = new Piece(PieceType.bishop, Color.black);
+		//board[4][4] = new Piece(PieceType.king, Color.white);
 		
 	}
 	
@@ -92,11 +96,44 @@ public class ChessBoard {
 		return newChessBoard;
 	}
 	
-	public void generateChildren() {
+	private boolean isWithinBoard(int x, int y) {
+		if ((x >= 0) && (x < boardX) && (y >= 0) && (y < boardY)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean isEmptyPosition(int x, int y) {
+		if (board[x][y].getPieceType() == PieceType.empty) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean isEnemyPosition(int x, int y) {
+		if ((board[x][y].getPieceType() != PieceType.empty) &&
+				(board[x][y].getPieceColor() != playerToMove)) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public int generateChildren() {
 		children.clear();
 		
 		Piece piece;
 		ChessBoard child;
+		int pawnDirection;
+		int tempX;
+		int tempY;
+		
+		int[] bishopDirections = {-1, 1};
+		int[][] knightDirections = {{1, 2}, {2, 1}, {2, -1}, {1, -2}, {-1, 2}, {-2, -1}, {-2, 1}, {-1, -2}};
+		int[][] rookDirections = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+		int[] kingDirections = {-1, 0, 1};
 		
 		for (int x = 0; x < boardX; x++) {
 			for (int y = 0; y < boardY; y++) {
@@ -107,33 +144,159 @@ public class ChessBoard {
 					if (piece.getPieceType() == PieceType.pawn) {
 						
 						if (piece.getPieceColor() == Color.white) {
-							// normal 1x forward
-							if (board[x][y+1].getPieceType() == PieceType.empty) {
-								child = this.makeMove(x, y, x, y+1);
+							pawnDirection = 1;
+						} else {
+							pawnDirection = -1;
+						}
+						
+						// normal 1x forward
+						if (isWithinBoard(x, y+pawnDirection*1) && isEmptyPosition(x, y+pawnDirection*1)) {
+							child = this.makeMove(x, y, x, y+pawnDirection*1);
+							
+							children.add(child);
+							//System.out.println(child);
+						}
+						
+						// 2x forward
+						if (isWithinBoard(x, y+pawnDirection*2) && 
+								piece.isUnmoved() &&
+								isEmptyPosition(x, y+pawnDirection*1) &&
+								isEmptyPosition(x, y+pawnDirection*2)) {
+							child = this.makeMove(x, y, x, y+pawnDirection*2);
+							
+							children.add(child);
+							//System.out.println(child);
+						}
+						
+						// take front left
+						if (isWithinBoard(x-1, y+pawnDirection*1) && isEnemyPosition(x-1, y+pawnDirection*1)) {
+							
+							child = this.makeMove(x, y, x-1, y+pawnDirection*1);
+							
+							children.add(child);
+							//System.out.println(child);
+						}
+						
+						// take front right
+						if (isWithinBoard(x+1, y+pawnDirection*1) && isEnemyPosition(x+1, y+pawnDirection*1)) {
+							
+							child = this.makeMove(x, y, x+1, y+pawnDirection*1);
+							
+							children.add(child);
+							//System.out.println(child);
+						}
+					}
+					
+					if ((piece.getPieceType() == PieceType.bishop) || (piece.getPieceType() == PieceType.queen)) {
+						
+						// going in all 4 directions
+						for (int bishopDirectionX : bishopDirections) {
+							for (int bishopDirectionY : bishopDirections) {
+								tempX = x+bishopDirectionX;
+								tempY = y+bishopDirectionY;
+								
+								// normal movement
+								while (isWithinBoard(tempX, tempY) && isEmptyPosition(tempX, tempY)) {
+									child = this.makeMove(x, y, tempX, tempY);
+									
+									children.add(child);
+									//System.out.println(child);
+									
+									tempX+=bishopDirectionX;
+									tempY+=bishopDirectionY;
+								}
+								
+								// capturing
+								if (isWithinBoard(tempX, tempY) && isEnemyPosition(tempX, tempY)) {
+									child = this.makeMove(x, y, tempX, tempY);
+									
+									children.add(child);
+									//System.out.println(child);
+								}
+							}
+						}
+					}
+					
+					if (piece.getPieceType() == PieceType.knight) {
+						// going in all 8 directions
+						for (int[] knightDirection : knightDirections) {
+							tempX = x+knightDirection[0];
+							tempY = y+knightDirection[1];
+							
+							if (isWithinBoard(tempX, tempY) && (isEnemyPosition(tempX, tempY) || isEmptyPosition(tempX, tempY))) {
+								child = this.makeMove(x, y, tempX, tempY);
 								
 								children.add(child);
-								System.out.println(child);
+								//System.out.println(child);
 							}
+						}
+					}
+					
+					if ((piece.getPieceType() == PieceType.rook) || (piece.getPieceType() == PieceType.queen)) {
+						
+						// going in all 4 directions
+						for (int[] rookDirection : rookDirections) {
+							tempX = x+rookDirection[0];
+							tempY = y+rookDirection[1];
 							
-							// 2x forward
-							if ((piece.isUnmoved()) &&
-									(board[x][y+1].getPieceType() == PieceType.empty) &&
-									(board[x][y+2].getPieceType() == PieceType.empty)) {
-								child = this.makeMove(x, y, x, y+2);
+							// normal movement
+							while (isWithinBoard(tempX, tempY) && isEmptyPosition(tempX, tempY)) {
+								child = this.makeMove(x, y, tempX, tempY);
 								
 								children.add(child);
+								//System.out.println(child);
 								
-								System.out.println(child);
+								tempX+=rookDirection[0];
+								tempY+=rookDirection[1];
 							}
 							
-							// take left
-							
-							// take right
+							// capturing
+							if (isWithinBoard(tempX, tempY) && isEnemyPosition(tempX, tempY)) {
+								child = this.makeMove(x, y, tempX, tempY);
+								
+								children.add(child);
+								//System.out.println(child);
+							}
+						}	
+					}
+					
+					if (piece.getPieceType() == PieceType.king) {
+						// going in all directions
+						for (int kingDirectionX : kingDirections) {
+							for (int kingDirectionY : kingDirections) {
+								tempX = x+kingDirectionX;
+								tempY = y+kingDirectionY;
+								
+								if (isWithinBoard(tempX, tempY) && (isEnemyPosition(tempX, tempY) || isEmptyPosition(tempX, tempY))) {
+									child = this.makeMove(x, y, tempX, tempY);
+									
+									children.add(child);
+									//System.out.println(child);
+								}
+							}
 						}
 					}
 				}
 			}
 		}
+		
+		return children.size();
+	}
+	
+	public int generateChildrenRecursive(int generations) {
+		if (generations == 1) {
+			return generateChildren();
+		}
+		
+		int size = 0;
+		
+		generateChildren();
+		
+		for (ChessBoard child: children) {
+			size += child.generateChildrenRecursive(generations-1);
+		}
+		
+		return size;
 	}
 	
 	public Color getPlayerToMove() {
@@ -151,6 +314,35 @@ public class ChessBoard {
 		
 		return value;
 	}
+	
+	public int getValueMiniMax() {
+		if (children.size() == 0) {
+			return getValue();
+		}
+		
+		int value = children.get(0).getValueMiniMax();
+		int tmpValue;
+		
+		// White wants Max Value; Black wants Min Value
+		for (int i = 0; i < children.size(); i++) {
+			tmpValue = children.get(i).getValueMiniMax();
+			if (playerToMove == Color.white) {
+				if (tmpValue > value) {
+					value = tmpValue;
+				}
+			} else {
+				if (tmpValue < value) {
+					value = tmpValue;
+				}
+			}
+		}
+		
+		return value;
+	}
+	
+	public ArrayList<ChessBoard> getChildren() {
+		return children;
+	}
 
 	public String toString() {
 		String out = ""; 
@@ -159,7 +351,8 @@ public class ChessBoard {
 		for (int y = boardY - 1; y >= 0; y--) {
 			for (int x = 0; x < boardX; x++) {
 				if (colorIndicator == Color.white) {
-					out += "▯";
+					//out += "▯";
+					out += " ";
 					colorIndicator = Color.black;
 				} else {
 					out += "▮";
