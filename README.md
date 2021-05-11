@@ -1,6 +1,6 @@
 # BadChessBot
 
-This is a chess bot using the Minimax-Algorithm. In the future there will be different bots using different Algorithms. 
+This is a chess bot using the Minimax-Algorithm. In the future there will be different bots using different Algorithms.
 
 ## Why is it bad?
 * horribly inefficient implementation
@@ -8,12 +8,13 @@ This is a chess bot using the Minimax-Algorithm. In the future there will be dif
 * no chess specific optimizations
 
 ## Todos
-I want to work on the bad points listed above. It will likely never become a "GoodChessBot", but thats not the goal. My objective for this project is to learn more about the Java-Language and the concepts of object oriented programming.
-
 * more efficient implementation - It should be possible to calculate 5 moves ahead.
 * Unit Tests with JUnit
 * implement a proper Game Class to handle matches
 * enable Human vs Bot games
+
+## Motivation
+It will likely never become a "GoodChessBot", but thats not the goal. My objective for this project is to learn more about the Java-Language and the concepts of object oriented programming.
 
 ## Future Perspectives
 * enable GUI
